@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Simple HTML Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f0f0f0; }
+    #chat-box { height:70vh; overflow-y:auto; background:white; padding:10px; }
+    #msg { width:80%; padding:10px; border:1px solid #ccc; border-radius:6px; }
+    #send { padding:10px 14px; border:none; border-radius:6px; background:#1976d2; color:white; cursor:pointer; }
+    .bubble { margin-bottom:12px; padding:8px 12px; background:#e7f1ff; border-radius:8px; max-width:70%; }
+    .time { font-size:11px; color:#666; margin-top:3px; }
+  </style>
+</head>
+<body>
+
+<h2 style="text-align:center; padding:10px;">Simple HTML Chat</h2>
+
+<div id="chat-box"></div>
+
+<div style="display:flex; gap:8px; padding:12px; background:white;">
+  <input id="msg" placeholder="Type something..." />
+  <button id="send">Send</button>
+</div>
+
+<script>
+  // Simple browser-only chat using BroadcastChannel
+  const channel = new BroadcastChannel('simple_chat')
+  const box = document.getElementById('chat-box')
+  const input = document.getElementById('msg')
+  const sendBtn = document.getElementById('send')
+
+  function addMessage(text, self=false) {
+    const d = document.createElement('div')
+    d.className = 'bubble'
+    d.style.background = self ? '#d2ffd2' : '#e7f1ff'
+    d.innerHTML = text + '<div class="time">' + new Date().toLocaleTimeString() + '</div>'
+    box.appendChild(d)
+    box.scrollTop = box.scrollHeight
+  }
+
+  sendBtn.onclick = () => {
+    const text = input.value.trim()
+    if (!text) return
+    addMessage(text, true)
+    channel.postMessage(text)
+    input.value = ''
+  }
+
+  channel.onmessage = (e) => {
+    addMessage(e.data)
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendBtn.click()
+  })
+</script>
+
+</body>
+</html>
